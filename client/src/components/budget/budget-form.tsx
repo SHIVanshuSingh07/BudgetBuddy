@@ -42,13 +42,12 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
   const createBudget = useMutation({
     mutationFn: async (data: Omit<InsertBudget, "userId">) => {
       if (!user) throw new Error("User not authenticated");
-      if (!data.amount || Number(data.amount) <= 0) {
-        throw new Error("Please enter a valid amount greater than 0");
-      }
 
       const res = await apiRequest("POST", "/api/budgets", {
         ...data,
         userId: user.id,
+        // Convert amount to string as expected by the schema
+        amount: data.amount.toString()
       });
       return res.json();
     },
@@ -83,7 +82,7 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
           <div className="space-y-2">
             <label>Category</label>
             <Select
-              onValueChange={(value) => form.setValue("category", value)}
+              onValueChange={(value) => form.setValue("category", value as typeof transactionCategories[number])}
               defaultValue={transactionCategories[0]}
             >
               <SelectTrigger>
