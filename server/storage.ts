@@ -8,24 +8,24 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Transaction methods
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getTransactions(userId: number): Promise<Transaction[]>;
-  
+
   // Budget methods
   createBudget(budget: InsertBudget): Promise<Budget>;
   getBudgets(userId: number): Promise<Budget[]>;
-  updateBudgetSpent(id: number, spent: number): Promise<Budget>;
-  
-  sessionStore: session.SessionStore;
+  updateBudgetSpent(id: number, spent: string): Promise<Budget>;
+
+  sessionStore: session.Store;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private transactions: Map<number, Transaction>;
   private budgets: Map<number, Budget>;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   private currentId: { users: number; transactions: number; budgets: number };
 
   constructor() {
@@ -57,7 +57,12 @@ export class MemStorage implements IStorage {
 
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
     const id = this.currentId.transactions++;
-    const newTransaction: Transaction = { ...transaction, id };
+    const newTransaction: Transaction = { 
+      ...transaction,
+      id,
+      // Ensure amount is stored as a string
+      amount: transaction.amount.toString(),
+    };
     this.transactions.set(id, newTransaction);
     return newTransaction;
   }
@@ -70,7 +75,13 @@ export class MemStorage implements IStorage {
 
   async createBudget(budget: InsertBudget): Promise<Budget> {
     const id = this.currentId.budgets++;
-    const newBudget: Budget = { ...budget, id, spent: 0 };
+    const newBudget: Budget = { 
+      ...budget,
+      id,
+      // Ensure amount and spent are stored as strings
+      amount: budget.amount.toString(),
+      spent: "0",
+    };
     this.budgets.set(id, newBudget);
     return newBudget;
   }
@@ -81,10 +92,14 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async updateBudgetSpent(id: number, spent: number): Promise<Budget> {
+  async updateBudgetSpent(id: number, spent: string): Promise<Budget> {
     const budget = this.budgets.get(id);
     if (!budget) throw new Error('Budget not found');
-    const updatedBudget = { ...budget, spent };
+    const updatedBudget = { 
+      ...budget,
+      // Ensure spent is stored as a string
+      spent: spent.toString(),
+    };
     this.budgets.set(id, updatedBudget);
     return updatedBudget;
   }
