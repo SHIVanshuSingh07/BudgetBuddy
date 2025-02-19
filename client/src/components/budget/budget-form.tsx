@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { InsertBudget } from "@shared/schema";
 import { insertBudgetSchema, transactionCategories } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
 
 interface BudgetFormProps {
   open: boolean;
@@ -26,17 +27,27 @@ interface BudgetFormProps {
 }
 
 export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
+  const { user } = useAuth();
   const form = useForm({
-    resolver: zodResolver(insertBudgetSchema),
+    resolver: zodResolver(
+      insertBudgetSchema.extend({
+        amount: insertBudgetSchema.shape.amount.transform((val) =>
+          val.toString()
+        ),
+      })
+    ),
     defaultValues: {
-      amount: 0,
+      amount: "0",
       category: transactionCategories[0],
     },
   });
 
   const createBudget = useMutation({
-    mutationFn: async (data: InsertBudget) => {
-      const res = await apiRequest("POST", "/api/budgets", data);
+    mutationFn: async (data: Omit<InsertBudget, "userId">) => {
+      const res = await apiRequest("POST", "/api/budgets", {
+        ...data,
+        userId: user!.id,
+      });
       return res.json();
     },
     onSuccess: () => {

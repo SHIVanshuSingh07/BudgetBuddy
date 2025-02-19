@@ -30,27 +30,38 @@ import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Transaction, InsertTransaction } from "@shared/schema";
 import { insertTransactionSchema, transactionCategories } from "@shared/schema";
+import { useAuth } from "@/hooks/use-auth";
 
 export function TransactionList() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
 
   const form = useForm({
-    resolver: zodResolver(insertTransactionSchema),
+    resolver: zodResolver(
+      insertTransactionSchema.extend({
+        amount: insertTransactionSchema.shape.amount.transform((val) =>
+          val.toString()
+        ),
+      })
+    ),
     defaultValues: {
-      amount: 0,
+      amount: "0",
       category: transactionCategories[0],
       description: "",
       type: "expense",
-      date: new Date().toISOString(),
+      date: new Date().toISOString().split("T")[0],
     },
   });
 
   const createTransaction = useMutation({
-    mutationFn: async (data: InsertTransaction) => {
-      const res = await apiRequest("POST", "/api/transactions", data);
+    mutationFn: async (data: Omit<InsertTransaction, "userId">) => {
+      const res = await apiRequest("POST", "/api/transactions", {
+        ...data,
+        userId: user!.id,
+      });
       return res.json();
     },
     onSuccess: () => {
