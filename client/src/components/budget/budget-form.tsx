@@ -20,6 +20,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { InsertBudget } from "@shared/schema";
 import { insertBudgetSchema, transactionCategories } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface BudgetFormProps {
   open: boolean;
@@ -28,6 +29,8 @@ interface BudgetFormProps {
 
 export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
+
   const form = useForm({
     resolver: zodResolver(
       insertBudgetSchema.extend({
@@ -44,9 +47,14 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
 
   const createBudget = useMutation({
     mutationFn: async (data: Omit<InsertBudget, "userId">) => {
+      if (!user) throw new Error("User not authenticated");
+      if (!data.amount || Number(data.amount) <= 0) {
+        throw new Error("Please enter a valid amount greater than 0");
+      }
+
       const res = await apiRequest("POST", "/api/budgets", {
         ...data,
-        userId: user!.id,
+        userId: user.id,
       });
       return res.json();
     },
@@ -54,6 +62,17 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
       onOpenChange(false);
       form.reset();
+      toast({
+        title: "Success",
+        description: "Budget created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -84,17 +103,35 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {form.formState.errors.category && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.category.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <label>Monthly Budget Amount</label>
             <Input
               type="number"
               step="0.01"
-              {...form.register("amount", { valueAsNumber: true })}
+              min="0"
+              {...form.register("amount", { 
+                valueAsNumber: true,
+                min: { value: 0, message: "Amount must be greater than 0" }
+              })}
             />
+            {form.formState.errors.amount && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.amount.message}
+              </p>
+            )}
           </div>
-          <Button type="submit" className="w-full">
-            Create Budget
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={createBudget.isPending}
+          >
+            {createBudget.isPending ? "Creating..." : "Create Budget"}
           </Button>
         </form>
       </DialogContent>
