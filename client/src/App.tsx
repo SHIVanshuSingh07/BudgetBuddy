@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
+import { SeriChat } from "@/components/chat/seri-chat";
 
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
@@ -28,6 +29,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router />
+        <SeriChat />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
