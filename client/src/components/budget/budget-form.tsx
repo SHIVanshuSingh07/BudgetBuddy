@@ -32,13 +32,7 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
   const { toast } = useToast();
 
   const form = useForm({
-    resolver: zodResolver(
-      insertBudgetSchema.extend({
-        amount: insertBudgetSchema.shape.amount.transform((val) =>
-          val.toString()
-        ),
-      })
-    ),
+    resolver: zodResolver(insertBudgetSchema),
     defaultValues: {
       amount: "0",
       category: transactionCategories[0],
@@ -115,10 +109,7 @@ export function BudgetForm({ open, onOpenChange }: BudgetFormProps) {
               type="number"
               step="0.01"
               min="0"
-              {...form.register("amount", { 
-                valueAsNumber: true,
-                min: { value: 0, message: "Amount must be greater than 0" }
-              })}
+              {...form.register("amount")}
             />
             {form.formState.errors.amount && (
               <p className="text-sm text-red-500">
