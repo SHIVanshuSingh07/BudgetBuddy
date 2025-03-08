@@ -4,17 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function TransactionsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] via-[#312e81] to-[#4c1d95] text-white">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <Card>
+      <main className="container mx-auto px-6 py-10">
+        {/* Transactions Card */}
+        <div className="bg-white/10 p-6 rounded-2xl shadow-lg backdrop-blur-md transition-all hover:shadow-2xl">
           <CardHeader>
-            <CardTitle>Transactions</CardTitle>
+            <CardTitle className="text-white text-2xl font-bold flex items-center gap-2">
+              🔄 Transactions
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <TransactionList />
           </CardContent>
-        </Card>
+        </div>
       </main>
     </div>
   );

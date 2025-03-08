@@ -1,0 +1,32 @@
+.animated-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(32, 32, 32, 0.8) 10%, transparent 50%);
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  transform: rotate(20deg);
+  animation: moveGrid 1s linear infinite;
+}
+
+@keyframes moveGrid {
+  from {
+    transform: translateY(0) rotate(20deg);
+  }
+  to {
+    transform: translateY(-100px) rotate(20deg);
+  }
+}

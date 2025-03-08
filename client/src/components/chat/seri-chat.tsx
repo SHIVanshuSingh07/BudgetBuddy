@@ -25,7 +25,7 @@ const financialResponses = {
 
 function getResponse(query: string): string {
   const lowerQuery = query.toLowerCase();
-  
+
   if (lowerQuery.includes("budget") || lowerQuery.includes("spending")) {
     return financialResponses.budget;
   }
@@ -38,7 +38,7 @@ function getResponse(query: string): string {
   if (lowerQuery.includes("debt") || lowerQuery.includes("loan")) {
     return financialResponses.debt;
   }
-  
+
   return financialResponses.default;
 }
 
@@ -54,7 +54,7 @@ export function SeriChat() {
 
     const userMessage = { content: input, sender: "user" as const };
     const seriResponse = { content: getResponse(input), sender: "seri" as const };
-    
+
     setMessages(prev => [...prev, userMessage, seriResponse]);
     setInput("");
   };
@@ -63,21 +63,21 @@ export function SeriChat() {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full p-4 h-12 w-12"
-        variant="default"
+        className="fixed bottom-4 right-4 rounded-full p-4 h-12 w-12 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] text-white shadow-lg hover:shadow-2xl transition-all"
       >
         <MessageCircle className="h-6 w-6" />
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="sm:max-w-[425px] bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+          <DialogHeader className="flex justify-between items-center">
+            <DialogTitle className="flex items-center gap-2 text-white">
               <MessageCircle className="h-5 w-5" />
               Chat with Seri
             </DialogTitle>
+            {/* <X className="h-5 w-5 cursor-pointer text-gray-300 hover:text-white" onClick={() => setIsOpen(false)} /> */}
           </DialogHeader>
-          
+
           <div className="flex flex-col h-[400px]">
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4">
@@ -89,10 +89,10 @@ export function SeriChat() {
                     }`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[80%] rounded-lg px-4 py-2 text-white ${
                         message.sender === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                          ? "bg-blue-500 shadow-lg"
+                          : "bg-white/20 backdrop-blur-md"
                       }`}
                     >
                       <p className="whitespace-pre-line">{message.content}</p>
@@ -108,9 +108,14 @@ export function SeriChat() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Ask about budgeting, saving, or investing..."
-                className="flex-1"
+                className="flex-1 bg-white/10 text-white placeholder-gray-300 border-none focus:ring-2 focus:ring-white"
               />
-              <Button onClick={handleSend}>Send</Button>
+              <Button
+                onClick={handleSend}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+              >
+                Send
+              </Button>
             </div>
           </div>
         </DialogContent>
