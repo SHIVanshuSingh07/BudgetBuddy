@@ -6,6 +6,10 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import dotenv from "dotenv";
+
+// ✅ Load environment variables from "server.env"
+dotenv.config({ path: "./server/server.env" });
 
 
 declare global {
@@ -30,15 +34,20 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  if (!process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET is missing in server.env file!");
+  }
+
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
+    cookie: { secure: false }, // Change to true in production with HTTPS
   };
 
   app.set("trust proxy", 1);
-  app.use(session(sessionSettings));
+  app.use(session(sessionSettings)); // ✅ Correctly applying session middleware
   app.use(passport.initialize());
   app.use(passport.session());
 
